@@ -1,9 +1,19 @@
-#include "includes.h"
-#include "functions.h"
+/* 
+ * © copyright  2017 - Gabriel Araújo de Souza
+ * Todos os direitos reservados - <gabriel_feg@hotmail.com>
+ */
 
 
+#include "Functions/functions.h"
+
+//Tamanho default do vetor a ser alocado
+//Representa o tamanho máximo que a máquina usada suporta
 #define N 536870912; //2^29
 
+/**
+ * Declaração de novo tipo: ponteiro para a assinatura 
+ * das funções de busca criadas
+ */
 using SearchFuncType = bool ( * ) 
 							(const std::vector<unsigned long long> &,
 							 std::size_t,
@@ -15,14 +25,14 @@ int main (int argc, char * argv[]){
 
 	/*ṔONTEIRO PARA AS FUNÇÕES*/
 	SearchFuncType SearchesAlgo[] = {
-		SsequentialIt,
-		SsequentialRec,
-		SbinaryIt,
-		SbinaryRec,
-		STernaryIt,
-		STernaryRec,
-		Sfind,
-		Sbinary
+		SsequentialIt, //0
+		SsequentialRec, //1
+		SbinaryIt,//2
+		SbinaryRec,//3
+		STernaryIt,//4
+		STernaryRec,//5
+		Sbinary,//6
+		Sfind//7
 	};
 
 	auto arrSz(0ul);
@@ -48,31 +58,51 @@ int main (int argc, char * argv[]){
 	//alocando espaço no vetor
 	std::vector<unsigned long long> V(arrSz);		
 
-	//preencher o vetor com valores aleatórios
+	//preencher o vetor com valores sequenciais
 	Fill (V, arrSz);
 
 	/*Análise emṕírica dos algoritmos implementos*/
+	//criando um valor impossível de existir no vetor
 	unsigned long long key;
+	key = 60000000000;
+
+	//variável que calcular a média de tempo para cada teste
+	// com quantidades de elementos diferentes
 	std::chrono::duration<double, std::milli> media(0);
-	key = 600000000;
 	int f;
 
+	//iniciando um arquivo para armazenar os resultados
+	//da análise.
 	std::ofstream collect;
-	collect.open("AnaliseEmpiricaIt.txt");
-	//cabeçalho
+	collect.open("AnaliseSequencial.txt");
+	
+	//Cabeçalho - Identifica as funções testadas
 	collect << "#QTD" << "			"
-			<< "#SSI" << "			"
-			<< "#SBI" << "			"
-			<< "#STI" << std::endl;
-
-	for (auto i(5300000ull); i <= arrSz; i += 5300000)
+	  		<< "#SSI" << "			"
+	  		<< "#FIND" <<  std::endl;
+	  		
+	for (auto i(5300000ull); i <= arrSz; i += 5300000 )
+	/*
+	 *Aqui temos uma divisão do vetor original em subvetores,
+	 *isso serve para fazer testes para quantidades menores e 
+	 *assim poder gerar um gráfico com os dados coletádos. 
+	 *Ele funciona em forma de uma PA.
+	 */
 	{
+		//informar pelo terminal quantos elementos 
+		//o algoritmo está testando.
 		std::cout << "Analisando para " << i << " posições..." << std::endl;
 		collect << i << "			";
-		for(f = 0; f < 5; f = f+2)
+
+		for(f = 0; f < 8; f += 7)
+		//Aqui fazemos a seleção da função testada
+		//modificar os parâmetros do for para anaĺisar funções 
+		//diferentes.
 		{
+			//informa o terminal qual função está rodando
 			std::cout << "\tRODANDO FUNÇÃO " << f << std::endl;
-			for (auto j(1ul); j <= 100; ++j)
+
+			for (auto j(1ul); j <= 10; ++j)
 			//rodar cada função 100 vezes para ter a média de tempo
 			{
 				auto start = std::chrono::steady_clock::now();
@@ -94,21 +124,10 @@ int main (int argc, char * argv[]){
 		}
 		collect << std::endl;
 	}
+	//fechar arquivo
 	collect.close();
+	//informar que o programa terminou a análise
 	std::cout << ">>>ANÁLISE EMPÍRICA CONCLUÍDA<<<" << std::endl;
-
-	// std::ofstream collect;
-	// collect.open("AnaliseEmpirica.txt");
-	// for (auto k(0); k < 3; ++k)
-	// {
-	// 	for(auto b(0); b < 16; ++b)
-	// 	{
-	// 		collect << std::chrono::duration <double, std::milli> (timeFunc[b][k]).count() << "\t";
-	// 	}
-	// 	collect << std::endl;
-	// }
-	// collect.close();
-	
 
 	return 0;
 }
